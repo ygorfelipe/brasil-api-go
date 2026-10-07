@@ -28,3 +28,4 @@ estrutura de pastas
 
 GO não é POO - porém é possível trabalhar como se fosse
 funções camelCase é compartilhada externamente caso ao contrario é privada, só sera acessada dentro do próprio pacote
+

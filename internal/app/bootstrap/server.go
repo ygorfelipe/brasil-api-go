@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ygorfelipe/brasil-api-go/internal/app/handlers/locations"
+	repositories "github.com/ygorfelipe/brasil-api-go/internal/infra/repositories/location"
 )
 
 // para chamar a função, em outro pacote, basta informar o nome do pacote e sua função ex: bootstrap.SrtartServer
@@ -33,16 +35,22 @@ func StartServer() {
 // no qual você pega apenas a referência da funçao do pacote que você deseja, ou seja, não precisa extrair o pacote todo
 // para depois escolher o que trabalhar, basta escolher diretamente o que precisa em dart ex: as env, as pkg; ao pado do import
 func configureRoutes(e *gin.Engine) {
-	// G grupo de rotas
 
+	locationRepository := repositories.NewLocationRepository()
+	locationHandler := locations.NewLocationRepository(locationRepository)
+
+	// G grupo de rotas
 	g := e.Group("/api/v1")
 	{
+		// exemplo
 		// em go nós temos sempre o nosso contexto quando precisaremos
 		g.GET("/states", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"message": "Hello World",
 			})
 		})
+
+		g.GET("/estados", locationHandler.GetAllStates)
 	}
 
 }
