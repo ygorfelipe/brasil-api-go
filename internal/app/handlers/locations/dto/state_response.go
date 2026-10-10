@@ -1,6 +1,8 @@
 package dto
 
 type StatesResponse struct {
-	Acronym string `json:"acronym,omitempty`
-	Name    string `json:"name,omitempty`
+	Acronym string         `json:"sigla,omitempty"`
+	Name    string         `json:"nome,omitempty"`
+	Capital string         `json:"capital,omitempty"`
+	Region  RegionResponse `json:"regiao"`
 }

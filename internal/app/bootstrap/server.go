@@ -51,6 +51,7 @@ func configureRoutes(e *gin.Engine) {
 		})
 
 		g.GET("/estados", locationHandler.GetAllStates)
+		g.GET("/cep/:cep", locationHandler.GetAddressByCep)
 	}
 
 }

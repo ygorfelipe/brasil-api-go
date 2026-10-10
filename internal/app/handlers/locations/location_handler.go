@@ -30,8 +30,28 @@ func (l *LocationHandler) GetAllStates(c *gin.Context) {
 		stateResponse = append(stateResponse, dto.StatesResponse{
 			Acronym: s.Acronym,
 			Name:    s.Name,
+			Capital: s.Capital,
+			Region: dto.RegionResponse{
+				Id:      s.Regiao.Id,
+				Name:    s.Regiao.Nome,
+				Acronym: s.Regiao.Sigla,
+			},
 		})
 	}
 
 	c.JSON(200, stateResponse)
+}
+
+func (l *LocationHandler) GetAddressByCep(c *gin.Context) {
+	cep := c.Param("cep")
+
+	address, err := l.locationRepository.GetAddressByCep(cep)
+
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, address)
 }
