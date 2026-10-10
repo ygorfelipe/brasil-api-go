@@ -11,17 +11,12 @@ import (
 	"github.com/ygorfelipe/brasil-api-go/internal/infra/repositories/location/dto"
 )
 
-// EM GO nao existe classes, mas sim é type
-// GO não tem interface, mas iremos criar uma estrutura
-
 type LocationRepository struct{}
 
 func NewLocationRepository() *LocationRepository {
 	// recuperando a referencia da memoria em * e o & atribui de onde iremos pegar
 	return &LocationRepository{}
 }
-
-// funcao "metodos"
 
 // retornando nossas entidades
 // seria um ARRAY mas é um slices, procurar sobre, sempre irá retornar EIther/Nil, ou seja, entidade ou erro/valor ou erro
@@ -71,7 +66,7 @@ func (l *LocationRepository) GetStates() ([]entities.StateEntity, error) {
 	// não é necessário declarar uma nova variavel para erro, pois ja existe lá em cima
 	err = json.NewDecoder(resp.Body).Decode(&statesResponse)
 	if err != nil {
-		fmt.Println("Erro ao decodificar estados: ", err)
+		fmt.Printf("Erro ao decodificar estados: %v\n", err)
 		return nil, err
 	}
 
@@ -83,12 +78,59 @@ func (l *LocationRepository) GetStates() ([]entities.StateEntity, error) {
 	// range, i++;
 
 	for _, s := range statesResponse {
-		// pegando a "classe" entidade, adicionando os valores da classe vindo do for de S
-		// declaro a "lista" para adicionar, retorno a lista e o nil (vazio/erro)
 		states = append(states, entities.StateEntity{
 			Acronym: s.Sigla,
 			Name:    s.Nome,
+			Capital: s.Capital,
+			Regiao: entities.RegionEntity{
+				Id:    s.Regiao.Id,
+				Sigla: s.Regiao.Nome,
+				Nome:  s.Regiao.Sigla,
+			},
 		})
 	}
 	return states, nil
+}
+
+func (l *LocationRepository) GetAddressByCep(cep string) (*dto.ViacepApiResponse, error) {
+	httpClient := http.Client{
+		Timeout: 20 * time.Second,
+	}
+
+	url := fmt.Sprintf("https://viacep.com.br/ws/%s/json/", cep)
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req = req.WithContext(ctx)
+
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		fmt.Println("Erro ao buscar endereço: ", err)
+		return nil, err
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("Erro ao fechar o Body da buscar do endereco: %v\n", err)
+		}
+	}()
+
+	var addressResponse dto.ViacepApiResponse
+
+	err = json.NewDecoder(resp.Body).Decode(&addressResponse)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &addressResponse, nil
+
 }
